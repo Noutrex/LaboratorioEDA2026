@@ -52,15 +52,16 @@ Posicion ContPalabras(LN linea);
 Posicion ContarLineas(CL cabezal);
 TipoRetorno BorrarPalabra(Posicion linea, Posicion pos);
 TipoRetorno BorrarLinea(Posicion linea);
+void Destruir();
+TipoRetorno ImprimirTexto();
 
 CL cabezal = NULL;
 DIC diccionario = NULL;
 void Inicializar(){
     
-    
+    Destruir();
     cabezal = new CabezalLinea;
     cabezal->primL = cabezal->ultL = NULL;
-
     diccionario = NULL;
 }
 
@@ -187,6 +188,15 @@ void Destruir(){
 
     BorrarDiccionario(diccionario);
     diccionario = NULL;
+}
+TipoRetorno ImprimirTexto(){
+    if(cabezal == NULL){
+        cout << "Texto vacio" <<endl;
+        return OK;
+    }
+//me falta imprimir la lista fuera del null
+
+
 }
 
 
