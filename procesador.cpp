@@ -46,13 +46,14 @@ struct Diccionario{
 };
 typedef Diccionario * DIC;
 
+void Inicializar();
+void Destruir();
 LN BuscarLinea(Posicion linea);
 Pal BuscarPalabra(LN linea, Posicion pos);
 Posicion ContPalabras(LN linea);
 Posicion ContarLineas(CL cabezal);
 TipoRetorno BorrarPalabra(Posicion linea, Posicion pos);
 TipoRetorno BorrarLinea(Posicion linea);
-void Destruir();
 TipoRetorno ImprimirTexto();
 TipoRetorno InsertarLinea();
 TipoRetorno IngresarPalabraDiccionario(string palabra);
