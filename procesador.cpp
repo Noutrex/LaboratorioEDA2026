@@ -56,6 +56,10 @@ void Destruir();
 TipoRetorno ImprimirTexto();
 TipoRetorno InsertarLinea();
 TipoRetorno IngresarPalabraDiccionario(string palabra);
+TipoRetorno AgregarIncorrectasAlDiccionario();
+bool existeEnDiccionario(DIC d,string palabra);
+TipoRetorno InsertarPalabra(Posicion linea, Posicion pos, string palabra);
+
 
 CL cabezal = NULL;
 DIC diccionario = NULL;
@@ -194,7 +198,7 @@ void Destruir(){
 
 TipoRetorno ImprimirTexto()
 {
-    if(cabezal == NULL)
+    if(cabezal == NULL||cabezal->primL==NULL)
     {
         cout << "Texto vacio" <<endl;
         return OK;
@@ -235,12 +239,23 @@ TipoRetorno InsertarLinea()
     cabezal->ultL = nueva;
     return OK;
 }
+
+bool palabraValida(string palabra){
+    if (palabra.empty() || palabra.find(' ') != string::npos) 
+        return false;
+    return true;
+}
+
 TipoRetorno IngresarPalabraDiccionario(string palabra) 
 {
-    if (palabra.empty() || palabra.find(' ') != string::npos) 
+    if (!palabraValida(palabra)){
         return ERROR;
+    }
 
-    if (diccionario == NULL) 
+    if(existeEnDiccionario(diccionario,palabra)){
+        return ERROR;
+    }
+    if (diccionario == NULL)
     {
         diccionario = new Diccionario;
         diccionario->Palabra = palabra;
@@ -250,12 +265,9 @@ TipoRetorno IngresarPalabraDiccionario(string palabra)
     }
     DIC aux = diccionario;
     DIC padre = NULL;
-
+    
     while (aux != NULL) 
     {
-        if (palabra == aux->Palabra)
-            return ERROR;
-
         padre = aux;
         if (palabra < aux->Palabra) 
             aux = aux->izq;
@@ -279,7 +291,7 @@ TipoRetorno IngresarPalabraDiccionario(string palabra)
 
     return OK;
 }
-void ImprimirDiccionarioAux(DIC d) {
+void ImprimirDiccionarioAux(DIC d){
     if (d == NULL) 
         return;
     ImprimirDiccionarioAux(d->izq);
@@ -299,8 +311,131 @@ TipoRetorno ImprimirDiccionario()
     return OK;
 }
 
+TipoRetorno InsertarPalabra(Posicion linea, Posicion pos, string palabra){
+    if(!palabraValida(palabra)){
+        return ERROR;
+    }
+    if(BuscarPalabra(linea)==NULL){
+        return ERROR;
+    }
+
+    Posicion cant = ContPalabras(l);
+    if (pos < 1 || pos > cant + 1) {
+        return ERROR;
+    }
+
+    Pal nuevo = new Palabras;
+    nuevo->Palabra = palabra;
+    nuevo->sigP = NULL;
+    nuevo->antP = NULL;
+
+    if (pos == 1) {
+        nuevo->sigP = l->primP;
+        if (l->primP != NULL) {
+            l->primP->antP = nuevo;
+        }
+        l->primP = nuevo;
+    } else {
+        Pal ant = BuscarPalabra(l, pos - 1);
+        nuevo->sigP = ant->sigP;
+        nuevo->antP = ant;
+        if (ant->sigP != NULL) {
+            ant->sigP->antP = nuevo;
+        }
+        ant->sigP = nuevo;
+    }
+
+    while (ContPalabras(l) > MAX_CANT_PALABRAS_X_LINEA) {
+
+        Pal ultPal = BuscarPalabra(l, ContPalabras(l));
+        string palabraApasar = ultPal->Palabra;
+
+        if (ultPal->antP != NULL) {
+            ultPal->antP->sigP = NULL;
+        } else {
+            l->primP = NULL;
+        }
+        delete ultPal;
+
+        if (l->sigL == NULL) {
+            InsertarLinea();
+        }
+
+        l = l->sigL;
+
+        Pal nodoPasado = new Palabras;
+        nodoPasado->Palabra = palabraApasar;
+        nodoPasado->sigP = l->primP;
+        nodoPasado->antP = NULL;
+
+        if (l->primP != NULL) {
+            l->primP->antP = nodoPasado;
+        }
+        l->primP = nodoPasado;
+    }
+
+    return OK;
+}
+
+bool existeEnDiccionario(DIC d,string palabra){
+    if(d==NULL){
+        return false;
+    }
+    if(palabra==d->Palabra){
+        return true;
+    }
+    if(palabra>d->Palabra){
+        return existeEnDiccionario(d->der,palabra);
+    }else{
+        return existeEnDiccionario(d->izq,palabra);
+    }
+
+}
+
+TipoRetorno ImprimirTextoIncorrecto(){
+    if(cabezal == NULL||cabezal->primL==NULL)
+    {
+        cout << "Texto vacio" <<endl;
+        return OK;
+    }
+    LN lAux = cabezal->primL;
+    Posicion numLinea = 1;
+
+    while (lAux != NULL) 
+    {
+        cout << numLinea << ":";
+        Pal pAux = lAux->primP;
+        while (pAux != NULL) {
+            if(!existeEnDiccionario(diccionario,pAux->Palabra)){
+                cout << " " << pAux->Palabra;
+            }
+            pAux = pAux->sigP;
+        }
+        cout << endl;
+        lAux = lAux->sigL;
+        numLinea++;
+    }
+    return OK;
+}
+
+TipoRetorno AgregarIncorrectasAlDiccionario(){
+    if(cabezal==NULL||cabezal->primL==NULL){
+        return OK;
+    }
+    LN lAux = cabezal->primL;
+    while(lAux!=NULL){
+        Pal pAux = lAux->primP;
+        while(pAux!=NULL){
+            IngresarPalabraDiccionario(pAux->Palabra);
+            pAux=pAux->sigP;
+        }
+        lAux=lAux->sigL;
+    }
+    return OK;
+}
 
 
 int main(){
+
     return 0;
 }
