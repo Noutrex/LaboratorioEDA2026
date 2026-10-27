@@ -54,6 +54,8 @@ TipoRetorno BorrarPalabra(Posicion linea, Posicion pos);
 TipoRetorno BorrarLinea(Posicion linea);
 void Destruir();
 TipoRetorno ImprimirTexto();
+TipoRetorno InsertarLinea();
+TipoRetorno IngresarPalabraDiccionario(string palabra);
 
 CL cabezal = NULL;
 DIC diccionario = NULL;
@@ -189,24 +191,116 @@ void Destruir(){
     BorrarDiccionario(diccionario);
     diccionario = NULL;
 }
-TipoRetorno ImprimirTexto(){
-    if(cabezal == NULL){
+
+TipoRetorno ImprimirTexto()
+{
+    if(cabezal == NULL)
+    {
         cout << "Texto vacio" <<endl;
         return OK;
     }
-//me falta imprimir la lista fuera del null
+    LN lAux = cabezal->primL;
+    Posicion numLinea = 1;
 
+    while (lAux != NULL) 
+    {
+        cout << numLinea << ":";
+        Pal pAux = lAux->primP;
+        while (pAux != NULL) {
+            cout << " " << pAux->Palabra;
+            pAux = pAux->sigP;
+        }
+        cout << endl;
+        lAux = lAux->sigL;
+        numLinea++;
+    }
+    return OK;
+}
 
+TipoRetorno InsertarLinea()
+{
+    if (cabezal == NULL) 
+    {
+        cabezal = new CabezalLinea;
+        cabezal->primL = cabezal->ultL = NULL;
+    }
+    LN nueva = new Linea;
+    nueva->primP = NULL;
+    nueva->sigL = NULL;
+    nueva->antL = cabezal->ultL;
+    if (cabezal->ultL != NULL)
+        cabezal->ultL->sigL = nueva;
+    else
+        cabezal->primL = nueva;
+    cabezal->ultL = nueva;
+    return OK;
+}
+TipoRetorno IngresarPalabraDiccionario(string palabra) 
+{
+    if (palabra.empty() || palabra.find(' ') != string::npos) 
+        return ERROR;
+
+    if (diccionario == NULL) 
+    {
+        diccionario = new Diccionario;
+        diccionario->Palabra = palabra;
+        diccionario->izq = NULL;
+        diccionario->der = NULL;
+        return OK;
+    }
+    DIC aux = diccionario;
+    DIC padre = NULL;
+
+    while (aux != NULL) 
+    {
+        if (palabra == aux->Palabra)
+            return ERROR;
+
+        padre = aux;
+        if (palabra < aux->Palabra) 
+            aux = aux->izq;
+        else 
+            aux = aux->der;
+    }
+
+    DIC nuevo = new Diccionario;
+    nuevo->Palabra = palabra;
+    nuevo->izq = NULL;
+    nuevo->der = NULL;
+
+    if (palabra < padre->Palabra)
+    {
+        padre->izq = nuevo;
+    } 
+    else 
+    {
+        padre->der = nuevo;
+    }
+
+    return OK;
+}
+void ImprimirDiccionarioAux(DIC d) {
+    if (d == NULL) 
+        return;
+    ImprimirDiccionarioAux(d->izq);
+    cout << d->Palabra << endl;
+    ImprimirDiccionarioAux(d->der);
+}
+
+TipoRetorno ImprimirDiccionario() 
+{
+    if (diccionario == NULL)
+    {
+        cout << "Diccionario vacio" << endl;
+        return OK;
+    }
+    ImprimirDiccionarioAux(diccionario);
+    
+    return OK;
 }
 
 
 
-
 int main(){
-
-
-
-
-
     return 0;
 }
