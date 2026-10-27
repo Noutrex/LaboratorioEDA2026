@@ -315,7 +315,8 @@ TipoRetorno InsertarPalabra(Posicion linea, Posicion pos, string palabra){
     if(!palabraValida(palabra)){
         return ERROR;
     }
-    if(BuscarPalabra(linea)==NULL){
+    LN l = BuscarLinea(linea);
+    if(l==NULL){
         return ERROR;
     }
 
